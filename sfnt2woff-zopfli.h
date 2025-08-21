@@ -1,7 +1,14 @@
-static void
-die(const char * msg)
+#include <stdarg.h>
+
+static __attribute__((format(printf, 1, 2))) void
+die(const char * msg, ...)
 {
-  fprintf(stderr, "# fatal error: %s\n", msg);
+  va_list ap;
+  va_start(ap, msg);
+  fputs("# fatal error: ", stderr);
+  vfprintf(stderr, msg, ap);
+  fputc('\n', stderr);
+  va_end(ap);
   exit(2);
 }
 
@@ -17,9 +24,7 @@ readFile(const char * name, uint32_t * len)
 {
   FILE * inFile = fopen(name, "rb");
   if (!inFile) {
-    char buf[200];
-    sprintf(buf, "unable to open file %s", name);
-    die(buf);
+    die("unable to open file %s", name);
   }
 
   if (fseek(inFile, 0, SEEK_END) != 0)
